@@ -11,3 +11,10 @@
 
 export * from "./api";
 export * from "./configuration";
+export * from "./types";
+export * from "./queries/mutation";
+export * from "./queries/collection";
+export * from "./queries/comment";
+export * from "./queries/post";
+export * from "./queries/topic";
+export * from "./queries/user";

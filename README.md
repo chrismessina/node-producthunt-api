@@ -55,6 +55,15 @@ const { data } = await productHuntAPI
 console.log(data.data.posts.edges)
 ```
 
+### Additional Usage Examples
+
+#### Query a specific topic
+
+```javascript
+const { data } = await productHuntAPI.GetTopic({ variables: { slug: "artificial-intelligence" } });
+console.log(data.data.topic);
+```
+
 Check out the [full API documentation](http://api-v2-docs.producthunt.com.s3-website-us-east-1.amazonaws.com/object/post/) for examples of all the available functions.
 
 ### Request options
@@ -114,6 +123,102 @@ try {
 ```
 
 
+### Mutations
+
+The library supports executing GraphQL mutations against the Product Hunt API. You can use mutations to perform actions like voting on posts, following topics, and more.
+
+#### Generic Mutation Support
+
+You can execute any custom mutation using the `Mutation` method:
+
+```javascript
+const { data } = await productHuntAPI.Mutation({
+  query: `
+    mutation VotePost($postId: ID!, $clientMutationId: String) {
+      votePost(input: { postId: $postId, clientMutationId: $clientMutationId }) {
+        clientMutationId
+        errors {
+          field
+          message
+        }
+        node {
+          id
+          isVoted
+          votesCount
+        }
+      }
+    }
+  `,
+  variables: {
+    postId: "POST_ID_HERE",
+    clientMutationId: "unique-client-id"
+  }
+});
+```
+
+#### Typed Mutation Helpers
+
+The library provides typed interfaces and pre-defined mutation strings for common operations:
+
+```javascript
+import { 
+  ProductHuntAPI, 
+  Configuration, 
+  votePost, 
+  followTopic, 
+  VotePostRequest, 
+  FollowTopicRequest 
+} from "node-producthunt-api";
+
+// Vote on a post
+const votePostRequest: VotePostRequest = {
+  query: votePost,
+  variables: {
+    postId: "POST_ID_HERE",
+    clientMutationId: "unique-client-id"
+  }
+};
+
+const { data } = await productHuntAPI.Mutation(votePostRequest);
+console.log(data);
+
+// Follow a topic
+const followTopicRequest: FollowTopicRequest = {
+  query: followTopic,
+  variables: {
+    topicId: "TOPIC_ID_HERE",
+    clientMutationId: "unique-client-id"
+  }
+};
+
+const { data } = await productHuntAPI.Mutation(followTopicRequest);
+```
+
+#### Available Mutation Strings
+
+The library exports the following pre-defined mutation strings:
+
+- `votePost` - Vote on a post
+- `unvotePost` - Remove vote from a post
+- `followTopic` - Follow a topic
+- `unfollowTopic` - Unfollow a topic
+- `followCollection` - Follow a collection
+- `unfollowCollection` - Unfollow a collection
+- `userFollow` - Follow a user
+- `userFollowUndo` - Unfollow a user
+- `voteComment` - Vote on a comment
+- `unvoteComment` - Remove vote from a comment
+
+#### Available Typed Interfaces
+
+The library provides typed interfaces for common mutations:
+
+- `VotePostRequest` / `VotePostVariables`
+- `FollowTopicRequest` / `FollowTopicVariables`
+- `FollowCollectionRequest` / `FollowCollectionVariables`
+- `UserFollowRequest` / `UserFollowVariables`
+- `VoteCommentRequest` / `VoteCommentVariables`
+
 ### Roadmap
 
 - [x] Support Typescript typing
@@ -122,11 +227,11 @@ try {
 - [x] Add GetTopics query
 - [x] Add GetPost query
 - [x] Support dev token
-- [ ] Add GetTopic query
-- [ ] Add GetCollection/s query
-- [ ] Add GetViewer/s query
-- [ ] Add GetUser/s query
+- [x] Add GetTopic query
+- [x] Add GetCollection/s query
+- [x] Add GetViewer/s query
+- [x] Add GetUser/s query
 - [ ] Add GetMakerGroup/s query
-- [ ] Add GetGoal/s query
-- [ ] Add GetComment/s query
-- [ ] Add mutation/s support
+- [x] Add GetGoal/s query
+- [x] Add GetComment/s query
+- [x] Add mutation/s support

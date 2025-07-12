@@ -1,0 +1,588 @@
+# Product Hunt V2 GraphQL Schema
+# Generated from introspection query on 2025-01-12
+
+scalar Boolean
+scalar DateTime
+scalar Float
+scalar ID
+scalar Int
+scalar String
+
+# Root Query Type
+type Query {
+  # Look up a Collection (only published)
+  collection(id: ID, slug: String): Collection
+  
+  # Look up Collections by various parameters
+  collections(
+    postId: ID
+    userId: ID
+    featured: Boolean
+    order: CollectionsOrder = FOLLOWERS_COUNT
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): CollectionConnection!
+  
+  # Look up a Comment
+  comment(id: ID!): Comment
+  
+  # Look up a Post
+  post(id: ID, slug: String): Post
+  
+  # Look up Posts by various parameters
+  posts(
+    featured: Boolean
+    postedBefore: DateTime
+    postedAfter: DateTime
+    topic: String
+    order: PostsOrder = RANKING
+    twitterUrl: String
+    url: String
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): PostConnection!
+  
+  # Look up a Topic
+  topic(id: ID, slug: String): Topic
+  
+  # Look up Topics by various parameters
+  topics(
+    followedByUserid: ID
+    query: String
+    order: TopicsOrder = NEWEST
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): TopicConnection!
+  
+  # Look up a User
+  user(id: ID, username: String): User
+  
+  # Top level scope for currently authenticated user
+  viewer: Viewer
+}
+
+# Root Mutation Type
+type Mutation {
+  # Follow a User as Viewer. Returns the followed User
+  userFollow(input: UserFollowInput!): UserFollowPayload!
+  
+  # Stop following a User as Viewer. Returns the un-followed User
+  userFollowUndo(input: UserFollowUndoInput!): UserFollowUndoPayload!
+}
+
+# Collection of posts
+type Collection implements TopicableInterface {
+  # Cover image for the collection
+  coverImage: String
+  
+  # Identifies the date and time when collection was created
+  createdAt: DateTime!
+  
+  # Description of the collection in plain text
+  description: String
+  
+  # Identifies the date and time when collection was featured
+  featuredAt: DateTime
+  
+  # Number of users following the collection
+  followersCount: Int!
+  
+  # ID of the collection
+  id: ID!
+  
+  # Whether the viewer is following the collection or not
+  isFollowing: Boolean!
+  
+  # Name of the collection
+  name: String!
+  
+  # Lookup posts which are part of the collection
+  posts(after: String, before: String, first: Int, last: Int): PostConnection!
+  
+  # Tagline of the collection
+  tagline: String!
+  
+  # Look up topics that are associated with the object
+  topics(after: String, before: String, first: Int, last: Int): TopicConnection!
+  
+  # Public URL of the collection
+  url: String!
+  
+  # User who created the collection
+  user: User!
+  
+  # ID of User who created the collection
+  userId: ID!
+}
+
+# Connection types for pagination
+type CollectionConnection {
+  edges: [CollectionEdge!]!
+  nodes: [Collection!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CollectionEdge {
+  cursor: String!
+  node: Collection!
+}
+
+# A comment posted by a User
+type Comment implements VotableInterface {
+  # Body of the comment
+  body: String!
+  
+  # Identifies the date and time when comment was created
+  createdAt: DateTime!
+  
+  # ID of the comment
+  id: ID!
+  
+  # Whether the Viewer has voted for the object or not
+  isVoted: Boolean!
+  
+  # Comment on which this comment was posted (null in case of top level comments)
+  parent: Comment
+  
+  # ID of Comment on which this comment was posted (null in case of top level comments)
+  parentId: ID
+  
+  # Lookup comments that were posted on the comment itself
+  replies(
+    order: CommentsOrder = NEWEST
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): CommentConnection!
+  
+  # Public URL of the comment
+  url: String!
+  
+  # User who posted the comment
+  user: User!
+  
+  # ID of User who posted the comment
+  userId: ID!
+  
+  # Votes on the comment
+  votes(
+    createdAfter: DateTime
+    createdBefore: DateTime
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): VoteConnection!
+  
+  # Number of votes that the object has currently
+  votesCount: Int!
+}
+
+type CommentConnection {
+  edges: [CommentEdge!]!
+  nodes: [Comment!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CommentEdge {
+  cursor: String!
+  node: Comment!
+}
+
+# A post
+type Post implements TopicableInterface & VotableInterface {
+  # Lookup collections which the Post is part of
+  collections(after: String, before: String, first: Int, last: Int): CollectionConnection!
+  
+  # Lookup comments on the Post
+  comments(
+    order: CommentsOrder = NEWEST
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): CommentConnection!
+  
+  # Number of comments made on the Post
+  commentsCount: Int!
+  
+  # Identifies the date and time when the Post was created
+  createdAt: DateTime!
+  
+  # Description of the Post in plain text
+  description: String
+  
+  # Identifies the date and time when the Post was featured
+  featuredAt: DateTime
+  
+  # ID of the Post
+  id: ID!
+  
+  # Whether the viewer has added the Post to one of their collections
+  isCollected: Boolean!
+  
+  # Whether the Viewer has voted for the object or not
+  isVoted: Boolean!
+  
+  # Users who are marked as makers of the Post
+  makers: [User!]!
+  
+  # Media items for the Post
+  media: [Media!]!
+  
+  # Name of the Post
+  name: String!
+  
+  # Additional product links
+  productLinks: [ProductLink!]!
+  
+  # Count of review for the Post
+  reviewsCount: Int!
+  
+  # Aggregate review rating for the Post
+  reviewsRating: Float!
+  
+  # URL friendly slug of the Post
+  slug: String!
+  
+  # Tagline of the Post
+  tagline: String!
+  
+  # Thumbnail media object of the Post
+  thumbnail: Media
+  
+  # Look up topics that are associated with the object
+  topics(after: String, before: String, first: Int, last: Int): TopicConnection!
+  
+  # URL of the Post on Product Hunt
+  url: String!
+  
+  # User who created the Post
+  user: User!
+  
+  # ID of User who created the Post
+  userId: ID!
+  
+  # Votes on the post
+  votes(
+    createdAfter: DateTime
+    createdBefore: DateTime
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): VoteConnection!
+  
+  # Number of votes that the object has currently
+  votesCount: Int!
+  
+  # URL that redirects to the Post's website
+  website: String!
+}
+
+type PostConnection {
+  edges: [PostEdge!]!
+  nodes: [Post!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PostEdge {
+  cursor: String!
+  node: Post!
+}
+
+# A topic
+type Topic {
+  # Identifies the date and time when topic was created
+  createdAt: DateTime!
+  
+  # Description of the topic
+  description: String!
+  
+  # Number of users who are following the topic
+  followersCount: Int!
+  
+  # ID of the topic
+  id: ID!
+  
+  # Image of the topic
+  image(width: Int, height: Int): String
+  
+  # Whether the viewer is following the topic or not
+  isFollowing: Boolean!
+  
+  # Name of the topic
+  name: String!
+  
+  # Number of posts that are part of the topic
+  postsCount: Int!
+  
+  # URL friendly slug of the topic
+  slug: String!
+  
+  # Public URL of the topic
+  url: String!
+}
+
+type TopicConnection {
+  edges: [TopicEdge!]!
+  nodes: [Topic!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type TopicEdge {
+  cursor: String!
+  node: Topic!
+}
+
+# A user
+type User {
+  # Cover image of the user
+  coverImage(width: Int, height: Int): String
+  
+  # Identifies the date and time when user was created
+  createdAt: DateTime!
+  
+  # Look up collections that the user is following
+  followedCollections(after: String, before: String, first: Int, last: Int): CollectionConnection!
+  
+  # [REDACTED] Look up other users who are following the user (Always empty for privacy reasons)
+  followers(after: String, before: String, first: Int, last: Int): UserConnection!
+  
+  # [REDACTED] Look up other users who are being followed by the user (Always empty for privacy reasons)
+  following(after: String, before: String, first: Int, last: Int): UserConnection!
+  
+  # Headline text of the user
+  headline: String
+  
+  # ID of the user
+  id: ID!
+  
+  # [REDACTED] Whether the viewer is following the user or not (Always false for privacy reasons)
+  isFollowing: Boolean
+  
+  # Whether the user is an accepted maker or not
+  isMaker: Boolean!
+  
+  # Whether the user is same as the viewer of the API
+  isViewer: Boolean!
+  
+  # Look up posts that the user has made
+  madePosts(after: String, before: String, first: Int, last: Int): PostConnection!
+  
+  # Name of the user
+  name: String!
+  
+  # Profile image of the user
+  profileImage(size: Int): String
+  
+  # Look up posts that the user has submitted
+  submittedPosts(after: String, before: String, first: Int, last: Int): PostConnection!
+  
+  # Twitter username of the user
+  twitterUsername: String
+  
+  # Public URL of the user's profile
+  url: String!
+  
+  # Username of the user
+  username: String!
+  
+  # Look up posts that the user has voted for
+  votedPosts(after: String, before: String, first: Int, last: Int): PostConnection!
+  
+  # URL for the user's website
+  websiteUrl: String
+}
+
+type UserConnection {
+  edges: [UserEdge!]!
+  nodes: [User!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type UserEdge {
+  cursor: String!
+  node: User!
+}
+
+# Top level scope for the user in whose context the API is running
+type Viewer {
+  # User who is the viewer of the API
+  user: User!
+}
+
+# A media object
+type Media {
+  # Type of media object
+  type: String!
+  
+  # Public URL for the media object. In case of videos this URL represents thumbnail generated from video
+  url(width: Int, height: Int): String!
+  
+  # Video URL of the media object
+  videoUrl: String
+}
+
+# Product link from a post
+type ProductLink {
+  type: String!
+  url: String!
+}
+
+# A vote
+type Vote {
+  # Identifies the date and time when Vote was created
+  createdAt: DateTime!
+  
+  # ID of the Vote
+  id: ID!
+  
+  # User who created the Vote
+  user: User!
+  
+  # ID of User who created the Vote
+  userId: ID!
+}
+
+type VoteConnection {
+  edges: [VoteEdge!]!
+  nodes: [Vote!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VoteEdge {
+  cursor: String!
+  node: Vote!
+}
+
+# Information about pagination in a connection
+type PageInfo {
+  # When paginating forwards, the cursor to continue
+  endCursor: String
+  
+  # When paginating forwards, are there more items?
+  hasNextPage: Boolean!
+  
+  # When paginating backwards, are there more items?
+  hasPreviousPage: Boolean!
+  
+  # When paginating backwards, the cursor to continue
+  startCursor: String
+}
+
+# Error type for mutations
+type Error {
+  # Field for which the error occurred
+  field: String!
+  
+  # Error message
+  message: String!
+}
+
+# Interfaces
+interface TopicableInterface {
+  # ID of the object
+  id: ID!
+  
+  # Look up topics that are associated with the object
+  topics(after: String, before: String, first: Int, last: Int): TopicConnection!
+}
+
+interface VotableInterface {
+  # ID of the object
+  id: ID!
+  
+  # Whether the Viewer has voted for the object or not
+  isVoted: Boolean!
+  
+  # Votes on the object
+  votes(
+    createdAfter: DateTime
+    createdBefore: DateTime
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): VoteConnection!
+  
+  # Number of votes that the object has currently
+  votesCount: Int!
+}
+
+# Enums
+enum CollectionsOrder {
+  NEWEST
+  FOLLOWERS_COUNT
+  FEATURED_AT
+}
+
+enum CommentsOrder {
+  NEWEST
+  VOTES_COUNT
+}
+
+enum PostsOrder {
+  FEATURED_AT
+  VOTES
+  RANKING
+  NEWEST
+}
+
+enum TopicsOrder {
+  NEWEST
+  FOLLOWERS_COUNT
+}
+
+# Input types for mutations
+input UserFollowInput {
+  # A unique identifier for the client performing the mutation
+  clientMutationId: String
+  
+  # ID of the User to follow
+  userId: ID!
+}
+
+input UserFollowUndoInput {
+  # A unique identifier for the client performing the mutation
+  clientMutationId: String
+  
+  # ID of the User to stop following
+  userId: ID!
+}
+
+# Mutation payload types
+type UserFollowPayload {
+  # A unique identifier for the client performing the mutation
+  clientMutationId: String
+  
+  # Errors that occurred during the mutation
+  errors: [Error!]!
+  
+  # The followed user
+  node: User
+}
+
+type UserFollowUndoPayload {
+  # A unique identifier for the client performing the mutation
+  clientMutationId: String
+  
+  # Errors that occurred during the mutation
+  errors: [Error!]!
+  
+  # The unfollowed user
+  node: User
+}

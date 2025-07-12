@@ -1,5 +1,5 @@
 export const topicsQuery = `
-query Topic ($first: Int, $last: Int, $order: TopicsOrder, $query: String, $followedByUserid: ID, $after: String, $before: String) {
+query Topics ($first: Int, $last: Int, $order: TopicsOrder, $query: String, $followedByUserid: ID, $after: String, $before: String) {
     topics (
         followedByUserid: $followedByUserid
         query: $query
@@ -31,6 +31,26 @@ query Topic ($first: Int, $last: Int, $order: TopicsOrder, $query: String, $foll
         edges {
             cursor
         }
+    }
+}
+`
+
+export const topicQuery = `
+query Topic ($id: ID, $slug: String) {
+    topic (
+        id: $id
+        slug: $slug
+    ) {
+        createdAt
+        description
+        followersCount
+        id
+        image
+        isFollowing
+        name
+        postsCount
+        slug
+        url
     }
 }
 `
